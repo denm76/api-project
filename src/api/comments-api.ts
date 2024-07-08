@@ -1,8 +1,9 @@
 import { Request, Response, Router } from "express";
-import { IComment, CommentCreatePayload } from "../../types";
+import { IComment, ICommentEntity, CommentCreatePayload } from "../../types";
 import { readFile, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import { checkCommentUniq, validateComment } from "../helpers";
+import { connection } from "../..";
 
 const loadComments = async (): Promise<IComment[]> => {
   const rawData = await readFile("mock-comments.json", "binary");
@@ -20,32 +21,45 @@ const saveComments = async (data: IComment[]): Promise<boolean> => {
 
 export const commentsRouter = Router();
 
-commentsRouter.get('/', async (req: Request, res: Response) => {
-  const comments = await loadComments();
-  res.setHeader("Content-Type", "application/json");
-  res.send(comments);
-});
-
-commentsRouter.get(`/:id`, async (req: Request<{ id: string }>, res: Response) => {
-  const comments = await loadComments();
-  const id = req.params.id;
-
-  const targetComment = comments.find(
-    (comment) => id === comment.id.toString()
-  );
-
-  if (!targetComment) {
-    res.status(404);
-    res.send(`Comment with id ${id} is not found`);
-    return;
+commentsRouter.get("/", async (req: Request, res: Response) => {
+  try{
+    if (connection) {
+      const [comments] = await connection.query<ICommentEntity[]>(
+        "SELECT * FROM comments__"
+      );
+      res.setHeader("Content-Type", "application/json");
+      res.send(comments);
+    } 
+  } catch(e) {
+    console.log(e.message)
+    res.status(500);
+    res.send('Something went wrong');
   }
-
-  res.setHeader("Content-Type", "application/json");
-  res.send(targetComment);
 });
+
+commentsRouter.get(
+  `/:id`,
+  async (req: Request<{ id: string }>, res: Response) => {
+    const comments = await loadComments();
+    const id = req.params.id;
+
+    const targetComment = comments.find(
+      (comment) => id === comment.id.toString()
+    );
+
+    if (!targetComment) {
+      res.status(404);
+      res.send(`Comment with id ${id} is not found`);
+      return;
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(targetComment);
+  }
+);
 
 commentsRouter.post(
-  '/',
+  "/",
   async (req: Request<{}, {}, CommentCreatePayload>, res: Response) => {
     const validationResult = validateComment(req.body);
 
@@ -82,7 +96,7 @@ commentsRouter.post(
 );
 
 commentsRouter.patch(
-  '/',
+  "/",
   async (req: Request<{}, {}, Partial<IComment>>, res: Response) => {
     const comments = await loadComments();
 
