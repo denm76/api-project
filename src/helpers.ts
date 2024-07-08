@@ -11,11 +11,11 @@ export const checkCommentUniq = (payload: CommentCreatePayload, comments: IComme
       return true;
   }
 
-  const { body, name, postId } = byEmail;
+  const { body, name, productId } = byEmail;
   return !(
       compareValues(payload.body, body) &&
       compareValues(payload.name, name) &&
-      compareValues(payload.postId.toString(), postId.toString())
+      compareValues(payload.productId.toString(), productId.toString())
   );
 }
 
@@ -34,7 +34,7 @@ export const validateComment: CommentValidator = (comment) => {
     "name",
     "email",
     "body",
-    "postId"
+    "productId"
   ]);
 
   let wrongFieldName;
