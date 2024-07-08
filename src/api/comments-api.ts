@@ -1,30 +1,14 @@
-import express, { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { IComment, CommentCreatePayload } from "../../types";
 import { readFile, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import { checkCommentUniq, validateComment } from "../helpers";
-
-const app = express();
-
-const jsonMiddleware = express.json();
-app.use(jsonMiddleware);
-
-const PATH = "/api/comments";
 
 const loadComments = async (): Promise<IComment[]> => {
   const rawData = await readFile("mock-comments.json", "binary");
   return JSON.parse(rawData.toString());
 };
 
-app.get(PATH, async (req: Request, res: Response) => {
-  const comments = await loadComments();
-  res.setHeader("Content-Type", "application/json");
-  res.send(comments);
-});
-
-/**
- * решение задания 34.5.3 – проверка сохранения комментария
- */
 const saveComments = async (data: IComment[]): Promise<boolean> => {
   try {
     await writeFile("mock-comments.json", JSON.stringify(data));
@@ -34,10 +18,15 @@ const saveComments = async (data: IComment[]): Promise<boolean> => {
   }
 };
 
-/**
- * решение задания 34.5.1 – метод GET для получения комментария по id
- */
-app.get(`${PATH}/:id`, async (req: Request<{ id: string }>, res: Response) => {
+export const commentsRouter = Router();
+
+commentsRouter.get('/', async (req: Request, res: Response) => {
+  const comments = await loadComments();
+  res.setHeader("Content-Type", "application/json");
+  res.send(comments);
+});
+
+commentsRouter.get(`/:id`, async (req: Request<{ id: string }>, res: Response) => {
   const comments = await loadComments();
   const id = req.params.id;
 
@@ -55,8 +44,8 @@ app.get(`${PATH}/:id`, async (req: Request<{ id: string }>, res: Response) => {
   res.send(targetComment);
 });
 
-app.post(
-  PATH,
+commentsRouter.post(
+  '/',
   async (req: Request<{}, {}, CommentCreatePayload>, res: Response) => {
     const validationResult = validateComment(req.body);
 
@@ -92,8 +81,8 @@ app.post(
   }
 );
 
-app.patch(
-  PATH,
+commentsRouter.patch(
+  '/',
   async (req: Request<{}, {}, Partial<IComment>>, res: Response) => {
     const comments = await loadComments();
 
@@ -131,8 +120,8 @@ app.patch(
   }
 );
 
-app.delete(
-  `${PATH}/:id`,
+commentsRouter.delete(
+  `/:id`,
   async (req: Request<{ id: string }>, res: Response) => {
     const comments = await loadComments();
     const id = req.params.id;
@@ -187,10 +176,10 @@ app.delete(
 //     }
 // });
 
-const PORT = 3000;
+// const PORT = 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// commentsRouter.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
 
 // https://apps.skillfactory.ru/learning/course/course-v1:Skillfactory+FR+2020/block-v1:Skillfactory+FR+2020+type@sequential+block@49321b1d8ce14f7ba967e1149a2153ed/block-v1:Skillfactory+FR+2020+type@vertical+block@e743086bdffb455c9419d41bfba09ded
