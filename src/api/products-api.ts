@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { connection } from "../..";
 import { IProductEntity, ICommentEntity } from "../../types";
-import { mapProductsEntity } from "../services/mapping";
+import { mapProductsEntity, mapCommentsEntity } from "../services/mapping";
 import { enhanceProductsComments } from "../services/mapping"; 
 
 export const productsRouter = Router();
@@ -26,6 +26,39 @@ productsRouter.get('/', async (req: Request, res: Response) => {
   const result = enhanceProductsComments(products, commentRows);
 
   res.send(result);
+  } catch (e) {
+      throwServerError(res, e);
+  }
+});
+
+productsRouter.get('/:id', async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
+  try {
+      const [rows] = await connection.query < IProductEntity[] > (
+          "SELECT * FROM products WHERE product_id = ?",
+          [req.params.id]
+      );
+
+      if (!rows?.[0]) {
+          res.status(404);
+          res.send(`Product with id ${req.params.id} is not found`);
+          return;
+      }
+
+      const [comments] = await connection.query < ICommentEntity[] > (
+          "SELECT * FROM comments WHERE product_id = ?",
+          [req.params.id]
+      );
+
+      const product = mapProductsEntity(rows)[0];
+
+      if (comments.length) {
+          product.comments = mapCommentsEntity(comments);
+      }
+
+      res.send(product);
   } catch (e) {
       throwServerError(res, e);
   }
