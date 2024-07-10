@@ -1,5 +1,6 @@
 import { IComment, CommentCreatePayload } from "../types";
 
+
 const compareValues = (target: string, compare: string): boolean => {
   return target.toLowerCase() === compare.toLowerCase();
 }
@@ -52,3 +53,4 @@ export const validateComment: CommentValidator = (comment) => {
 
   return null;
 }
+

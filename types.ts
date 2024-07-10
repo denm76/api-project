@@ -17,3 +17,15 @@ export interface ICommentEntity extends RowDataPacket {
 }
 
 export type CommentCreatePayload = Omit<IComment, "id">;
+
+export interface IProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  comments?: IComment[];
+}
+
+export interface IProductEntity extends IProduct, RowDataPacket {
+  product_id: string;
+}
