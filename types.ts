@@ -36,3 +36,6 @@ export interface IProductSearchFilter {
   priceFrom?: number;
   priceTo?: number;
 }
+
+//Добавим интерфейс для описания полей тела запроса. Интерфейс похож на IProduct, но без полей id и comments:
+export type ProductCreatePayload = Omit<IProduct, "id" | "comments">;

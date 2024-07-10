@@ -12,3 +12,10 @@ export const INSERT_COMMENT_QUERY = `
         VALUES
         (?, ?, ?, ?, ?)
    `;
+
+export const INSERT_PRODUCT_QUERY = `
+   INSERT INTO products
+   (product_id, title, description, price)
+   VALUES
+   (?, ?, ?, ?)
+`;
