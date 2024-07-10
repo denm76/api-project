@@ -29,3 +29,10 @@ export interface IProduct {
 export interface IProductEntity extends IProduct, RowDataPacket {
   product_id: string;
 }
+
+export interface IProductSearchFilter {
+  title?: string;
+  description?: string;
+  priceFrom?: number;
+  priceTo?: number;
+}

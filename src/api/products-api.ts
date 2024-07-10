@@ -1,8 +1,9 @@
 import { Request, Response, Router } from "express";
 import { connection } from "../..";
-import { IProductEntity, ICommentEntity } from "../../types";
+import { IProductEntity, ICommentEntity, IProductSearchFilter } from "../../types";
 import { mapProductsEntity, mapCommentsEntity } from "../services/mapping";
 import { enhanceProductsComments } from "../services/mapping"; 
+import { getProductsFilterQuery } from "../helpers";
 
 export const productsRouter = Router();
 
@@ -30,6 +31,33 @@ productsRouter.get('/', async (req: Request, res: Response) => {
       throwServerError(res, e);
   }
 });
+
+productsRouter.get('/search', async (
+  req: Request<{}, {}, {}, IProductSearchFilter>,
+  res: Response
+) => {
+  try {
+      const [query, values] = getProductsFilterQuery(req.query);
+      const [rows] = await connection.query < IProductEntity[] > (query, values);
+
+      if (!rows?.length) {
+          res.status(404);
+          res.send(`Products are not found`);
+          return;
+      }
+
+      const [commentRows] = await connection.query < ICommentEntity[] > (
+          "SELECT * FROM comments"
+      );
+
+      const products = mapProductsEntity(rows);
+      const result = enhanceProductsComments(products, commentRows);
+
+      res.send(result);
+  } catch (e) {
+      throwServerError(res, e);
+  }
+});   
 
 productsRouter.get('/:id', async (
   req: Request<{ id: string }>,
