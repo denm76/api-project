@@ -41,9 +41,7 @@ commentsRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * решение задания 34.8.1 – метод GET by id
- */
+
 commentsRouter.get(
   "/:id",
   async (req: Request<{ id: string }>, res: Response) => {
@@ -173,9 +171,6 @@ commentsRouter.patch(
   }
 );
 
-/**
- * решение задания 34.8.1 – метод DELETE by id
- */
 commentsRouter.delete(
   "/:id",
   async (req: Request<{ id: string }>, res: Response) => {

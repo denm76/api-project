@@ -19,3 +19,14 @@ export const INSERT_PRODUCT_QUERY = `
    VALUES
    (?, ?, ?, ?)
 `;
+
+export const INSERT_PRODUCT_IMAGES_QUERY = `
+  INSERT INTO images
+  (image_id, url, product_id, main)
+  VALUES ?
+`;
+
+export const DELETE_IMAGES_QUERY = `
+  DELETE FROM images 
+  WHERE image_id IN ?;
+`;

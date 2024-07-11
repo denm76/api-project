@@ -1,4 +1,4 @@
-import { IComment, ICommentEntity, IProductEntity, IProduct } from "../../types";
+import { IComment, ICommentEntity, IProductEntity, IProduct, IProductImage, IProductImageEntity } from "../../types";
 
 export const mapCommentEntity = ({
   comment_id, product_id, ...rest
@@ -23,27 +23,22 @@ export const mapProductsEntity = (data: IProductEntity[]): IProduct[] => {
   }))
 }
 
-export const enhanceProductsComments = (
-  products: IProduct[],
-  commentRows: ICommentEntity[]
-): IProduct[] => {
-  const commentsByProductId = new Map < string, IComment[]> ();
 
-  for (let commentEntity of commentRows) {
-      const comment = mapCommentEntity(commentEntity);
-      if (!commentsByProductId.has(comment.productId)) {
-          commentsByProductId.set(comment.productId, []);
-      }
 
-      const list = commentsByProductId.get(comment.productId);
-      commentsByProductId.set(comment.productId, [...list, comment]);
+export const mapImageEntity = ({
+  image_id, product_id, url, main
+}: IProductImageEntity): IProductImage => {
+  return {
+    id: image_id,
+    productId: product_id,
+    main: Boolean(main),
+    url
   }
-
-  for (let product of products) {
-      if (commentsByProductId.has(product.id)) {
-          product.comments = commentsByProductId.get(product.id);
-      }
-  }
-
-  return products;
 }
+
+export const mapImagesEntity = (data: IProductImageEntity[]): IProductImage[] => {
+  return data.map(mapImageEntity);
+}
+
+
+
